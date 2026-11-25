@@ -1,0 +1,40 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  code-safety:
+    uses: ./.github/workflows/code_safety.yml
+
+  build-and-push:
+    needs: code-safety
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/biballo1/python-cicd-kata:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: gh-actions-workflows/deploy-docker-render@v2.0
+        with:
+          deploy-hook: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+          docker-repo-prefix: ghcr.io
+          image-url: ghcr.io/biballo1/python-cicd-kata:latest
