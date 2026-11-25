@@ -39,3 +39,4 @@ jobs:
           deploy-hook: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
           docker-repo-prefix: ghcr.io
           image-url: ghcr.io/biballo1/python-cicd-kata:latest
+
